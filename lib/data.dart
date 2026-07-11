@@ -29,8 +29,7 @@ class CardConfig {
       'Learning in public, one build at a time.';
 
   /// The URL this card is hosted at — this is what the QR code encodes.
-  /// TODO: replace with your real Render URL after the first deploy.
-  static const String cardUrl = 'https://benson-phuah-card.onrender.com';
+  static const String cardUrl = 'https://benson-connect-hub.onrender.com';
 
   // ---- Contact (used by the compose actions + the vCard) -----------------
   static const String email = 'bensonphuah@gmail.com';
