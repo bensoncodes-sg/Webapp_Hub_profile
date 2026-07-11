@@ -57,58 +57,48 @@ class _CardBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Fills the screen when collapsed (flexible gaps expand), and scrolls
-    // cleanly once the GitHub dropdown makes the content taller than the screen.
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return SingleChildScrollView(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: constraints.maxHeight),
-            child: IntrinsicHeight(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(22, 18, 22, 18),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _fx(const _TopBar(), 0),
-                    const SizedBox(height: 20),
-                    _fx(const _Header(), 1),
-                    const SizedBox(height: 26),
-                    _fx(const _ComposeSection(), 2),
-                    const SizedBox(height: 18),
-                    _fx(const _SaveRow(), 3),
-                    const SizedBox(height: 30),
-                    // Links spread to fill the remaining height.
-                    _fx(
-                      _LinkRow(
-                        icon: const FaIcon(FontAwesomeIcons.linkedinIn,
-                            size: 16, color: AppColors.accent),
-                        label: 'linkedin',
-                        onTap: () => openUrl(CardConfig.linkedinUrl),
-                      ),
-                      4,
-                    ),
-                    const Spacer(flex: 1),
-                    _fx(const _GithubTile(), 5),
-                    const Spacer(flex: 1),
-                    _fx(
-                      _LinkRow(
-                        icon: const Icon(Icons.work_outline,
-                            size: 18, color: AppColors.accent),
-                        label: 'portfolio',
-                        onTap: () => openUrl(CardConfig.portfolioUrl),
-                      ),
-                      6,
-                    ),
-                    const Spacer(flex: 1),
-                    const _Footer(),
-                  ],
-                ),
+    // Top-aligned scroll: content flows with even spacing and the footer sits
+    // just below it (no empty gap), scrolling if it's taller than the screen.
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(22, 18, 22, 26),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _fx(const _TopBar(), 0),
+            const SizedBox(height: 20),
+            _fx(const _Header(), 1),
+            const SizedBox(height: 24),
+            _fx(const _ComposeSection(), 2),
+            const SizedBox(height: 16),
+            _fx(const _SaveRow(), 3),
+            const SizedBox(height: 24),
+            _fx(
+              _LinkRow(
+                icon: const FaIcon(FontAwesomeIcons.linkedinIn,
+                    size: 16, color: AppColors.accent),
+                label: 'linkedin',
+                onTap: () => openUrl(CardConfig.linkedinUrl),
               ),
+              4,
             ),
-          ),
-        );
-      },
+            const SizedBox(height: 13),
+            _fx(const _GithubTile(), 5),
+            const SizedBox(height: 13),
+            _fx(
+              _LinkRow(
+                icon: const Icon(Icons.work_outline,
+                    size: 18, color: AppColors.accent),
+                label: 'portfolio',
+                onTap: () => openUrl(CardConfig.portfolioUrl),
+              ),
+              6,
+            ),
+            const SizedBox(height: 28),
+            const _Footer(),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -121,13 +111,154 @@ class _TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        const Icon(Icons.menu, size: 21, color: AppColors.textMuted),
-        Text(CardConfig.handle, style: mono(size: 12.5, color: AppColors.textMuted)),
-        const Icon(Icons.ios_share, size: 20, color: AppColors.textMuted),
-      ],
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _Pressable(
+            onTap: () => _showMenuSheet(context),
+            child: Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: AppColors.bg,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              alignment: Alignment.center,
+              child: const Icon(Icons.menu, size: 19, color: AppColors.iconStrong),
+            ),
+          ),
+          Text(CardConfig.handle, style: mono(size: 12.5, color: AppColors.textMuted)),
+          _Pressable(
+            onTap: () => shareCard(context),
+            child: Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: AppColors.bg,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              alignment: Alignment.center,
+              child: const Icon(Icons.ios_share, size: 18, color: AppColors.accent),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Quick-actions menu opened from the top-bar menu button.
+void _showMenuSheet(BuildContext context) {
+  showModalBottomSheet(
+    context: context,
+    backgroundColor: AppColors.surfaceAlt,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+    ),
+    builder: (sheetCtx) => Padding(
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 28),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.borderStrong,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
+          _MenuItem(
+            icon: const Icon(Icons.person_add_alt_1, size: 19, color: AppColors.accent),
+            label: 'Save to contacts',
+            onTap: () {
+              Navigator.pop(sheetCtx);
+              saveContact();
+            },
+          ),
+          _MenuItem(
+            icon: const Icon(Icons.qr_code_2, size: 19, color: AppColors.accent),
+            label: 'Show QR code',
+            onTap: () {
+              Navigator.pop(sheetCtx);
+              _showQrSheet(context);
+            },
+          ),
+          _MenuItem(
+            icon: const Icon(Icons.link, size: 19, color: AppColors.accent),
+            label: 'Copy link',
+            onTap: () {
+              Navigator.pop(sheetCtx);
+              copyLink(context);
+            },
+          ),
+          Container(
+            height: 1,
+            color: AppColors.border,
+            margin: const EdgeInsets.symmetric(vertical: 8),
+          ),
+          _MenuItem(
+            icon: const FaIcon(FontAwesomeIcons.linkedinIn, size: 16, color: AppColors.accent),
+            label: 'LinkedIn',
+            onTap: () {
+              Navigator.pop(sheetCtx);
+              openUrl(CardConfig.linkedinUrl);
+            },
+          ),
+          _MenuItem(
+            icon: const FaIcon(FontAwesomeIcons.github, size: 17, color: AppColors.accent),
+            label: 'GitHub',
+            onTap: () {
+              Navigator.pop(sheetCtx);
+              openUrl(CardConfig.githubs.first.url);
+            },
+          ),
+          _MenuItem(
+            icon: const Icon(Icons.work_outline, size: 18, color: AppColors.accent),
+            label: 'Portfolio',
+            onTap: () {
+              Navigator.pop(sheetCtx);
+              openUrl(CardConfig.portfolioUrl);
+            },
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class _MenuItem extends StatelessWidget {
+  final Widget icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _MenuItem({required this.icon, required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return _Pressable(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        child: Row(
+          children: [
+            SizedBox(width: 26, child: Center(child: icon)),
+            const SizedBox(width: 14),
+            Text(label, style: sans(size: 14, color: AppColors.textPrimary)),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -512,24 +643,29 @@ class _GithubTileState extends State<_GithubTile> {
             ),
           ),
         ),
-        AnimatedSize(
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeOutCubic,
-          child: _open
-              ? Padding(
-                  padding: const EdgeInsets.only(top: 8, left: 6),
-                  child: Column(
-                    children: [
-                      for (final g in CardConfig.githubs)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 7),
-                          child: _GithubSubRow(account: g),
-                        ),
-                    ],
+        if (_open)
+          Container(
+            margin: const EdgeInsets.only(top: 10, left: 8),
+            padding: const EdgeInsets.only(left: 13),
+            decoration: const BoxDecoration(
+              border: Border(
+                left: BorderSide(color: AppColors.borderStrong, width: 1.5),
+              ),
+            ),
+            child: Column(
+              children: [
+                for (int i = 0; i < CardConfig.githubs.length; i++)
+                  Padding(
+                    padding: EdgeInsets.only(
+                        bottom: i == CardConfig.githubs.length - 1 ? 0 : 9),
+                    child: _GithubSubRow(account: CardConfig.githubs[i]),
                   ),
-                )
-              : const SizedBox(width: double.infinity),
-        ),
+              ],
+            ),
+          )
+              .animate()
+              .fadeIn(duration: 160.ms)
+              .slideY(begin: -0.03, end: 0, duration: 160.ms, curve: Curves.easeOut),
       ],
     );
   }
@@ -546,39 +682,39 @@ class _GithubSubRow extends StatelessWidget {
     return _Pressable(
       onTap: () => openUrl(account.url),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+        padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 14),
         decoration: BoxDecoration(
           color: AppColors.surfaceDeep,
-          borderRadius: BorderRadius.circular(11),
-          border: Border.all(color: const Color(0xFF18181B)),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFF1E1E22)),
         ),
         child: Row(
           children: [
             Container(
-              width: 6,
-              height: 6,
+              width: 7,
+              height: 7,
               decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 11),
             Expanded(
               child: Text(account.handle,
                   style: mono(
-                      size: 11.5,
+                      size: 12.5,
                       color: account.primary
                           ? AppColors.textPrimary
                           : AppColors.textSecondary)),
             ),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                 color: account.primary ? AppColors.accentBgTint : Colors.transparent,
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(7),
                 border: Border.all(
                     color: account.primary
                         ? AppColors.accentBorderTint
                         : AppColors.borderStrong),
               ),
-              child: Text(account.label, style: mono(size: 9, color: tagColor)),
+              child: Text(account.label, style: mono(size: 9.5, color: tagColor)),
             ),
           ],
         ),
