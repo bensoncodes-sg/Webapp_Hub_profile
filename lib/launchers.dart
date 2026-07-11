@@ -59,11 +59,10 @@ Future<void> openUrl(String url) =>
 /// the link to the clipboard and shows a confirmation instead.
 Future<void> shareCard(BuildContext context) async {
   try {
-    await SharePlus.instance.share(
-      ShareParams(
-        text: '${CardConfig.name} — ${CardConfig.cardUrl}',
-        subject: '${CardConfig.name} · digital card',
-      ),
+    // This method is the most compatible and will fix the 'Undefined' error
+    await Share.share(
+      '${CardConfig.name} — ${CardConfig.cardUrl}',
+      subject: '${CardConfig.name} · digital card',
     );
   } catch (_) {
     if (context.mounted) await copyLink(context);
