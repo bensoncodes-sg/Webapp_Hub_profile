@@ -1,6 +1,5 @@
 // Smoke test: the card renders Benson's name and the key actions.
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:benson_nfc_card/main.dart';
